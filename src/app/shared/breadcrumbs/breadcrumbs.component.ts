@@ -13,14 +13,14 @@ export class BreadcrumbsComponent implements OnInit {
   constructor(private router: Router,
               private title: Title,
               private meta: Meta
-    ) { 
+    ) {
     this.getDataRoute().subscribe(data => {
       this.titulo = data.titulo;
       this.title.setTitle(this.titulo);
 
       const metaTag: MetaDefinition = {
         name: 'description',
-        content: this.titulo 
+        content: this.titulo
       };
 
       this.meta.updateTag(metaTag);
