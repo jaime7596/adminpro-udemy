@@ -6,6 +6,7 @@ import { Usuario } from '../../models/usuario.model';
 import { map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { SubirArchivoService } from '../subir-archivo/subir-archivo.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,8 @@ export class UsuarioService {
   token: string;
 
   constructor(public http: HttpClient,
-              public router: Router) {
+              public router: Router,
+              public _subirArchivoService: SubirArchivoService) {
     this.cargarStorage();
    }
 
@@ -25,7 +27,7 @@ export class UsuarioService {
    }
 
    cargarStorage() {
-     if(localStorage.getItem('toekn')){
+     if(localStorage.getItem('token')) {
        this.token = localStorage.getItem('token');
        this.usuario = JSON.parse(localStorage.getItem('usuario'));
      } else {
@@ -101,5 +103,40 @@ export class UsuarioService {
             return resp.usuario;
           })
         );
+   }
+
+   actualizarUsuario(usuario: Usuario): Observable<any> {
+    return this.http.put(`${this.url}/usuario/${usuario._id}?token=${ this.token }`, usuario)
+                        .pipe(
+                          map(
+                            (resp: any) => {
+                              this.guadarStorage(resp.usuario._id, this.token, resp.usuario);
+                              Swal.fire({
+                                title: 'Usuario Actualizado',
+                                icon: 'success',
+                                confirmButtonText: 'Ok'
+                              });
+                              return true;
+                            })
+                        );
+   }
+
+   cambiarImagen( archivo: File, id: string ) {
+      this._subirArchivoService.subirArchivo(archivo, 'usuarios', id)
+        .then((resp: any) => {
+          console.log(resp);
+          this.usuario.img = resp.usuario.img;
+
+          Swal.fire({
+            title: 'Imagen Actualizada',
+            icon: 'success',
+            confirmButtonText: 'Ok'
+          });
+
+          this.guadarStorage(id, this.token, this.usuario);
+      })
+        .catch( resp => {
+          console.log(resp);
+        });
    }
 }
