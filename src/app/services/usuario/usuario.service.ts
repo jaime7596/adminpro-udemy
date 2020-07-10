@@ -110,7 +110,9 @@ export class UsuarioService {
                         .pipe(
                           map(
                             (resp: any) => {
-                              this.guadarStorage(resp.usuario._id, this.token, resp.usuario);
+                              if(usuario._id === this.usuario._id) {
+                                this.guadarStorage(resp.usuario._id, this.token, resp.usuario);
+                              }
                               Swal.fire({
                                 title: 'Usuario Actualizado',
                                 icon: 'success',
@@ -138,5 +140,20 @@ export class UsuarioService {
         .catch( resp => {
           console.log(resp);
         });
+   }
+
+   cargarUsuarios(desde: number = 0) {
+    return this.http.get(`${this.url}/usuario?desde=${desde}`);
+   }
+
+   buscarUsuarios(termino: string) {
+     return this.http.get(`${this.url}/busqueda/coleccion/usuarios/${termino}`)
+      .pipe(
+        map((resp: any) => resp.usuarios)
+      );
+   }
+
+   eliminarUsuario(id: string) {
+      return this.http.delete(`${this.url}/usuario/${id}?token=${this.token}`);
    }
 }
